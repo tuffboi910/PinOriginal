@@ -1,0 +1,32 @@
+name: Build Chroma APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [ chroma ]
+    paths:
+      - Chroma-source.zip
+      - .github/workflows/chroma-build.yml
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: Extract Chroma
+        run: mkdir chroma-build && unzip -q Chroma-source.zip -d chroma-build
+      - name: Build APK
+        working-directory: chroma-build
+        run: gradle :app:assembleDebug --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Chroma-debug-apk
+          path: chroma-build/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
