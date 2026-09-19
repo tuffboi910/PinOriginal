@@ -7,11 +7,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 20
 
     steps:
@@ -50,3 +50,14 @@ jobs:
           name: PinOriginal-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      - name: Publish one-tap APK release
+        if: github.event_name != 'pull_request'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: PinOriginal Latest
+          body: Latest tested PinOriginal debug APK, built automatically from main.
+          prerelease: false
+          make_latest: true
+          files: app/build/outputs/apk/debug/app-debug.apk
